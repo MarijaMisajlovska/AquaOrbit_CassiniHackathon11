@@ -35,9 +35,7 @@ uvicorn api:app --host 0.0.0.0 --port 8000 --reload
 
 ### 4. Test it
 ```bash
-curl -X POST http://localhost:8000/analyze-water \
-  -H "Content-Type: application/json" \
-  -d '{"lat": 41.0297, "lon": 20.7169}'
+Invoke-RestMethod -Uri "http://localhost:8000/analyze-water" -Method Post -ContentType "application/json" -Body '{"lat": 31.74491, "lon": 50.13993}'
 ```
 
 Expected response:
