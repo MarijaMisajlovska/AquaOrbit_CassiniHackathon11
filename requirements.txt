@@ -1,0 +1,20 @@
+# Web Server & API
+fastapi
+uvicorn[standard]
+
+# Satellite Data & GIS
+openeo
+rasterio
+numpy
+
+# Image & Data Processing
+scipy
+pandas
+
+# Authentication & Requests
+requests
+python-multipart
+
+# Utilities
+pydantic
+python-dotenv

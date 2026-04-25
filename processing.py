@@ -59,6 +59,42 @@ def compute_ndwi(B03: np.ndarray, B08: np.ndarray) -> np.ndarray:
     return safe_normalized_difference(B03, B08)
 
 
+def compute_turbidity(B04: np.ndarray, B03: np.ndarray) -> np.ndarray:
+    """
+    Normalized Difference Water Index.
+    NDWI = (Green - NIR) / (Green + NIR)
+
+    Positive values indicate open water bodies.
+    Negative values indicate land, vegetation, or built-up areas.
+
+    Args:
+        B03: Green band reflectance array
+        B08: NIR band reflectance array
+
+    Returns:
+        2D array of NDWI values
+    """
+    return safe_normalized_difference(B04, B03)
+
+
+def compute_suspendent_sediment(B04: np.ndarray, B02: np.ndarray) -> np.ndarray:
+    """
+    Normalized Difference Water Index.
+    NDWI = (Green - NIR) / (Green + NIR)
+
+    Positive values indicate open water bodies.
+    Negative values indicate land, vegetation, or built-up areas.
+
+    Args:
+        B03: Green band reflectance array
+        B08: NIR band reflectance array
+
+    Returns:
+        2D array of NDWI values
+    """
+    return safe_normalized_difference(B04, B02)
+
+
 def compute_ndci(B05: np.ndarray, B04: np.ndarray) -> np.ndarray:
     """
     Normalized Difference Chlorophyll Index.
@@ -129,24 +165,29 @@ def process_water_quality(bands: Dict[str, np.ndarray]) -> Dict[str, Any]:
         Dict with ndwi, ndci, water_detected, pollution_status, or raises ValueError
         if no valid satellite data is available.
     """
+    B02 = bands.get("B02")
     B03 = bands.get("B03")
     B04 = bands.get("B04")
     B05 = bands.get("B05")
     B08 = bands.get("B08")
 
-    if any(b is None for b in [B03, B04, B05, B08]):
+    if any(b is None for b in [B02, B03, B04, B05, B08]):
         raise ValueError("Missing required bands. Cannot compute water quality indices.")
 
     # Compute indices across the spatial extent
     ndwi_array = compute_ndwi(B03, B08)
     ndci_array = compute_ndci(B05, B04)
+    turb_array = compute_turbidity(B04, B03)
+    sediment_array = compute_suspendent_sediment(B04, B02)
 
     # Extract representative scalar values (spatial median)
     ndwi_val = extract_point_value(ndwi_array)
     ndci_val = extract_point_value(ndci_array)
+    turb_val = extract_point_value(turb_array)
+    sediment_val = extract_point_value(sediment_array)
 
     # If both are None → no valid data at all (cloud cover, out-of-bounds, etc.)
-    if ndwi_val is None and ndci_val is None:
+    if ndwi_val is None and ndci_val is None and turb_val is None and sediment_val is None:
         raise ValueError(
             "No valid satellite data available for this location. "
             "The area may be fully cloud-covered. Try again in a few days."
@@ -167,6 +208,8 @@ def process_water_quality(bands: Dict[str, np.ndarray]) -> Dict[str, Any]:
     return {
         "ndwi": round(ndwi_val, 4) if ndwi_val is not None else None,
         "ndci": round(ndci_val, 4) if ndci_val is not None else None,
+        "turbidity": round(turb_val, 4) if turb_val is not None else None,
+        "suspendent_sediment": round(sediment_val, 4) if sediment_val is not None else None,
         "water_detected": water_detected,
         "pollution_status": pollution_status,
     }

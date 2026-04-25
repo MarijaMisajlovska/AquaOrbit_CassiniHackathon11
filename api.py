@@ -18,7 +18,8 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from functools import lru_cache
 from typing import Optional
-
+import json
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
@@ -112,11 +113,35 @@ class LocationInfo(BaseModel):
 class WaterAnalysisResponse(BaseModel):
     location: LocationInfo
     ndwi: Optional[float]
-    ndci: Optional[float]
+    ndci: Optional[float]  # chlorophyll
+    turbidity: Optional[float]
+    suspendent_sediment: Optional[float]
     water_detected: bool
     pollution_status: str
     timestamp: str
     cached: bool = False
+
+
+def save_result_to_json(data: dict):
+    """
+    Ја зачувува содржината што се испишува во терминалот во JSON фајл
+    во истиот директориум каде што се наоѓаат скриптите.
+    """
+    # Креираме име на фајл базирано на локацијата и времето за да биде уникатно
+    lat = data["location"]["lat"]
+    lon = data["location"]["lon"]
+    filename = f"output_{lat}_{lon}.json"
+
+    # Го одредуваме патот до AquaOrbit_CassiniHackathon11 директориумот
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(base_dir, filename)
+
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"--- [SUCCESS] Terminal output saved to: {filename} ---")
+    except Exception as e:
+        print(f"--- [ERROR] Could not save JSON file: {e} ---")
 
 
 # ── Core analysis function (runs in thread pool) ────────────────────────────────
@@ -144,15 +169,22 @@ def _run_analysis(lat: float, lon: float) -> dict:
     # Step 2: Compute NDWI, NDCI, and classify pollution
     quality = process_water_quality(fetch_result["bands"])
 
-    return {
+    result = {
         "location": {"lat": lat, "lon": lon},
         "ndwi": quality["ndwi"],
         "ndci": quality["ndci"],
+        "turbidity": quality["turbidity"],
+        "suspendent_sediment": quality["suspendent_sediment"],
         "water_detected": quality["water_detected"],
         "pollution_status": quality["pollution_status"],
         "timestamp": fetch_result["timestamp"],
         "cached": False,
     }
+
+
+    save_result_to_json(result)
+
+    return result
 
 
 # ── API Endpoints ───────────────────────────────────────────────────────────────

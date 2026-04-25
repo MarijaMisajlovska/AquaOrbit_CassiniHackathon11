@@ -24,8 +24,9 @@ pip install -r requirements.txt
 ```bash
 python -c "import openeo; c = openeo.connect('https://openeo.dataspace.copernicus.eu'); c.authenticate_oidc()"
 ```
-This opens a browser window. Log in with your Copernicus Data Space credentials.
-Your token is cached in `~/.config/openeo/` — subsequent runs are automatic.
+```bash
+Invoke-RestMethod -Uri "http://localhost:8000/analyze-water" -Method Post -ContentType "application/json" -Body '{"lat": 41.0297, "lon": 20.7169}'
+```
 
 ### 3. Run the API server
 ```bash
@@ -42,13 +43,18 @@ curl -X POST http://localhost:8000/analyze-water \
 Expected response:
 ```json
 {
-  "location": {"lat": 41.0297, "lon": 20.7169},
-  "ndwi": 0.4521,
-  "ndci": -0.0821,
-  "water_detected": true,
-  "pollution_status": "LOW",
-  "timestamp": "2025-04-25T10:32:11.123456",
-  "cached": false
+    "location": {
+        "lat": 44.7224,
+        "lon": 21.1599
+    },
+    "ndwi": -0.4227,
+    "ndci": 0.1948,
+    "turbidity": -0.068,
+    "suspendent_sediment": 0.082,
+    "water_detected": false,
+    "pollution_status": "MEDIUM",
+    "timestamp": "2026-04-25T14:28:23.527454",
+    "cached": false
 }
 ```
 

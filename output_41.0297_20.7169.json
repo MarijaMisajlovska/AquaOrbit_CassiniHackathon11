@@ -1,0 +1,14 @@
+{
+    "location": {
+        "lat": 41.0297,
+        "lon": 20.7169
+    },
+    "ndwi": 0.1805,
+    "ndci": -0.0046,
+    "turbidity": -0.0817,
+    "suspendent_sediment": -0.1879,
+    "water_detected": true,
+    "pollution_status": "LOW",
+    "timestamp": "2026-04-25T14:23:40.120744",
+    "cached": false
+}
