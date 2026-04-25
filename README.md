@@ -24,6 +24,8 @@ pip install -r requirements.txt
 ```bash
 python -c "import openeo; c = openeo.connect('https://openeo.dataspace.copernicus.eu'); c.authenticate_oidc()"
 ```
+
+add your "lat" and "lon" values, the ones entered are for example.
 ```bash
 Invoke-RestMethod -Uri "http://localhost:8000/analyze-water" -Method Post -ContentType "application/json" -Body '{"lat": 41.0297, "lon": 20.7169}'
 ```
